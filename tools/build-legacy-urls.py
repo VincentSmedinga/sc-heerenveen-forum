@@ -163,12 +163,13 @@ def read_dump(path):
     real_topics = [r for r in dicts("topics") if r["topic_moved_id"] == "0"]  # skip "moved" shadow rows
     topics = {r["topic_id"] for r in real_topics}
     with_topics = {r["forum_id"] for r in real_topics}
-    forums = {r["forum_id"] for r in dicts("forums") if r["forum_type"] == "1" and r["forum_id"] in with_topics}
+    forums = {r["forum_id"] for r in dicts("forums") if r["forum_type"] == "1"}  # every postable board
+    populated = forums & with_topics  # boards that hold at least one real topic
     # Only ids are needed from posts; each row starts with "(post_id,topic_id,".
     start = text.index("INSERT INTO `posts` VALUES\n")
     end = text.index("/*!40000 ALTER TABLE `posts` ENABLE KEYS */;", start)  # post text can contain ";\n"
     posts = set(re.findall(r"^\((\d+),\d+,", text[start:end], re.M))
-    return topics, forums, posts
+    return topics, forums, populated, posts
 
 
 def main():
@@ -196,12 +197,12 @@ def main():
     known = None
     if args.dump:
         print("reading dump", file=sys.stderr)
-        topics, forums, posts = read_dump(args.dump)
-        print(f"  {len(topics)} topics, {len(forums)} boards, {len(posts)} posts", file=sys.stderr)
+        topics, forums, populated, posts = read_dump(args.dump)
+        print(f"  {len(topics)} topics, {len(forums)} boards ({len(populated)} with topics), {len(posts)} posts", file=sys.stderr)
         known = {"topic": topics, "forum": forums, "post": posts}
         for t in topics:
             add(f"https://{CANONICAL_HOST}/forum/viewtopic.php?t={t}", "topic", t, "", "phpbb-dump")
-        for f in forums:
+        for f in populated:
             add(f"https://{CANONICAL_HOST}/forum/viewforum.php?f={f}", "forum", f, "", "phpbb-dump")
 
     fields = ["url", "type", "id", "start", "in_dump", "source"]
