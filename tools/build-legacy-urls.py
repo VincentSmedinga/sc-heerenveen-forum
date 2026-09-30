@@ -48,7 +48,8 @@ def fetch_cdx(pattern):
 
 
 def num(v):
-    return v if v is not None and re.fullmatch(r"\d+", v) else None
+    """Canonical form of a numeric parameter ("0042" -> "42"), or None if it isn't a number."""
+    return str(int(v)) if v is not None and re.fullmatch(r"\d+", v) else None
 
 
 def normalise(original, mime):
@@ -88,8 +89,8 @@ def normalise(original, mime):
             return None, "invalid", None, None
         return out(f"memberlist.php?mode=viewprofile&u={uid}", "profile", uid)
     if page in ("file.php", "download/file.php"):  # phpBB 3 serves attachments from download/
-        if num(q.get("id")):
-            return out(f"{page}?id={q['id']}", "attachment", q["id"])
+        if (att := num(q.get("id"))) is not None:
+            return out(f"{page}?id={att}", "attachment", att)
         if q.get("avatar"):
             return out(f"{page}?avatar={quote(q['avatar'])}", "avatar", q["avatar"])
         return None, "invalid", None, None
