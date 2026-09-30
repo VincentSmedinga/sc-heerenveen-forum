@@ -13,7 +13,8 @@ Normalisation
   - viewtopic.php: ?t=X[&start=N] (topic) or ?p=X (post)
   - viewforum.php: ?f=X[&start=N]
   - profile.php and memberlist.php ?mode=viewprofile&u=X: memberlist.php?mode=viewprofile&u=X
-  - everything else: the path, and the id parameter where one exists
+  - everything else (posting.php, login.php, search.php, ...): the path only. The query
+    string is dropped and `id` stays empty
 
 Usage
   tools/build-legacy-urls.py [--dump PATH] [--out data/legacy-urls.csv]
@@ -159,8 +160,10 @@ def read_dump(path):
         cols = table_columns(text, table)
         return (dict(zip(cols, r)) for r in read_statement(text, table))
 
-    topics = {r["topic_id"] for r in dicts("topics") if r["topic_moved_id"] == "0"}
-    forums = {r["forum_id"] for r in dicts("forums") if r["forum_type"] == "1"}
+    real_topics = [r for r in dicts("topics") if r["topic_moved_id"] == "0"]  # skip "moved" shadow rows
+    topics = {r["topic_id"] for r in real_topics}
+    with_topics = {r["forum_id"] for r in real_topics}
+    forums = {r["forum_id"] for r in dicts("forums") if r["forum_type"] == "1" and r["forum_id"] in with_topics}
     # Only ids are needed from posts; each row starts with "(post_id,topic_id,".
     start = text.index("INSERT INTO `posts` VALUES\n")
     end = text.index("/*!40000 ALTER TABLE `posts` ENABLE KEYS */;", start)  # post text can contain ";\n"
