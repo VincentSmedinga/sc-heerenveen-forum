@@ -11,7 +11,7 @@ Normalised URLs of the old phpBB forum (`sc.heerenveen.org/forum/` and `heerenve
 | `id` | Depends on `type`, see below. Empty when the URL carries no id |
 | `start` | Offset for paginated topics and boards (30 posts per page, 20 topics per page). Only set on `topic` and `forum` rows, and only when it is above 0 |
 | `in_dump` | `yes` or `no`: whether the id exists in the final phpBB database. Only filled for `topic`, `forum` and `post` rows; **empty means "not checked", not "missing"** |
-| `source` | `wayback` (Wayback Machine CDX API), `phpbb-dump` (every real topic and every board with topics), or both |
+| `source` | `wayback` (Wayback Machine CDX API), `phpbb-dump` (every topic and every board with topics). Topics include the 17 "moved" shadow ids, which phpBB redirects to the topic they moved to, or both |
 
 What `id` holds per `type`. `attachment` and `avatar` rows come from `download/file.php` (phpBB 3). The script also accepts the phpBB 2 form `file.php` and keeps whichever path it saw, but the current data only has `download/file.php`:
 

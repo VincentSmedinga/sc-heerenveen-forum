@@ -3,7 +3,7 @@
 
 Sources
   wayback      Wayback Machine CDX API (fetched live)
-  phpbb-dump   every real topic and every board that holds topics, read from the
+  phpbb-dump   every topic (moved-topic shadows included) and every board that holds topics, read from the
                private phpBB dump (optional; pass --dump). The dump itself never
                enters the repo, only the ids derived from it.
 
@@ -160,9 +160,11 @@ def read_dump(path):
         cols = table_columns(text, table)
         return (dict(zip(cols, r)) for r in read_statement(text, table))
 
-    real_topics = [r for r in dicts("topics") if r["topic_moved_id"] == "0"]  # skip "moved" shadow rows
-    topics = {r["topic_id"] for r in real_topics}
-    with_topics = {r["forum_id"] for r in real_topics}
+    all_topics = list(dicts("topics"))
+    # Moved-topic shadow rows (topic_moved_id > 0) stay in: phpBB redirects their ids to the
+    # moved topic, so they are valid legacy URLs. Only real topics decide which boards are populated.
+    topics = {r["topic_id"] for r in all_topics}
+    with_topics = {r["forum_id"] for r in all_topics if r["topic_moved_id"] == "0"}
     forums = {r["forum_id"] for r in dicts("forums") if r["forum_type"] == "1"}  # every postable board
     populated = forums & with_topics  # boards that hold at least one real topic
     # Only ids are needed from posts; each row starts with "(post_id,topic_id,".
