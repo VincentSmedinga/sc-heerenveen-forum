@@ -8,10 +8,22 @@ Normalised URLs of the old phpBB forum (`sc.heerenveen.org/forum/` and `heerenve
 | --- | --- |
 | `url` | Normalised URL: https, no `www.` or port, no session or view parameters |
 | `type` | `topic`, `post`, `forum`, `profile`, `attachment`, `avatar`, `feed`, `index` or `other` |
-| `id` | The phpBB id: topic, post, board or user id |
-| `start` | Offset for paginated topics and boards (30 posts per page, 20 topics per page) |
-| `in_dump` | `yes` or `no`: whether the id exists in the final phpBB database. Empty for types that have no id in the dump |
+| `id` | Depends on `type`, see below. Empty when the URL carries no id |
+| `start` | Offset for paginated topics and boards (30 posts per page, 20 topics per page). Only set on `topic` and `forum` rows, and only when it is above 0 |
+| `in_dump` | `yes` or `no`: whether the id exists in the final phpBB database. Only filled for `topic`, `forum` and `post` rows; **empty means "not checked", not "missing"** |
 | `source` | `wayback` (Wayback Machine CDX API), `phpbb-dump` (every real topic and every board with topics), or both |
+
+What `id` holds per `type`:
+
+| `type` | `id` | `in_dump` |
+| --- | --- | --- |
+| `topic`, `post`, `forum` | the phpBB topic, post or board id | checked |
+| `profile` | the phpBB user id | not checked (the dump's users aren't read) |
+| `attachment` | the attachment id from `download/file.php?id=` | not checked |
+| `avatar` | the avatar file name from `file.php?avatar=` (for example `1007_1193741649.jpg`), not a number | not checked |
+| `feed` | the topic id if the URL has `t=`, otherwise the board id from `f=`; empty for plain `feed.php` | not checked |
+| `index` | the category id from `c=`; empty for the forum root and plain `index.php` | not checked |
+| `other` | always empty | not checked |
 
 Post permalinks (`viewtopic.php?p=`) are listed only when Wayback saw them. The dump has 576,837 posts, and they are covered by rule, not by list.
 
