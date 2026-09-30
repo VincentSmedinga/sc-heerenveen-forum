@@ -13,14 +13,14 @@ Normalised URLs of the old phpBB forum (`sc.heerenveen.org/forum/` and `heerenve
 | `in_dump` | `yes` or `no`: whether the id exists in the final phpBB database. Only filled for `topic`, `forum` and `post` rows; **empty means "not checked", not "missing"** |
 | `source` | `wayback` (Wayback Machine CDX API), `phpbb-dump` (every real topic and every board with topics), or both |
 
-What `id` holds per `type`:
+What `id` holds per `type`. `attachment` and `avatar` rows come from `download/file.php` (phpBB 3). The script also accepts the phpBB 2 form `file.php` and keeps whichever path it saw, but the current data only has `download/file.php`:
 
 | `type` | `id` | `in_dump` |
 | --- | --- | --- |
 | `topic`, `post`, `forum` | the phpBB topic, post or board id | checked |
 | `profile` | the phpBB user id | not checked (the dump's users aren't read) |
-| `attachment` | the attachment id from `download/file.php?id=` | not checked |
-| `avatar` | the avatar file name from `file.php?avatar=` (for example `1007_1193741649.jpg`), not a number | not checked |
+| `attachment` | the attachment id from `?id=` | not checked |
+| `avatar` | the avatar file name from `?avatar=` (for example `1007_1193741649.jpg`), not a number | not checked |
 | `feed` | the topic id if the URL has `t=`, otherwise the board id from `f=`; empty for plain `feed.php` | not checked |
 | `index` | the category id from `c=`; empty for the forum root and plain `index.php` | not checked |
 | `other` | always empty | not checked |
